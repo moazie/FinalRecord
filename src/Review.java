@@ -4,8 +4,8 @@ public class Review {
     private String description;
 
     public Review(int starRating, String description) {
-        if (starRating < 1 || starRating > 5) {
-            throw new IllegalArgumentException("Rating must be between 1 and 5.");
+        if (starRating < 1 || starRating > 10) {
+            throw new IllegalArgumentException("Rating must be between 1 and 10.");
         }
         this.starRating = starRating;
         this.description = description;
@@ -17,6 +17,7 @@ public class Review {
 
     public static String displayStarRating(float stars) {
         char[] chars = new char[9]; // 5 stars + 4 spaces
+        stars = stars / 2;
         int fullStars = (int) stars;
         float fraction = stars - fullStars;
 
@@ -55,6 +56,6 @@ public class Review {
 
     @Override
     public String toString() {
-        return starRating + "★ - \"" + description + "\" (by " + ")";
+        return displayStarRating(starRating) + description;
     }
 }

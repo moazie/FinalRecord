@@ -1,15 +1,25 @@
 
 import java.io.*;
-import java.util.*;
+import java.time.LocalDate;
 
 public class App {
 
     static int optionMain;
-    static String filePath = "data/data.txt";
+    static String filePath = "data/data.csv";
     static String item = "";
+    static String tags = "";
+
+    static String nameSearch = null;
+    static String tagSearch = null;
+    static String descSearch = null;
+
+    static float score = 0;
+    static boolean ifTag = false;
+
+    static int sort = 0;
 
     public static void main(String[] args) throws Exception {
-        //To implement
+        //tbi
         clearConsole();
         userInterface();
         fileWrite(item);
@@ -17,80 +27,64 @@ public class App {
     }
 
     public static void userInterface() {
-        try (Scanner scan = new Scanner(System.in)) {
-            String menu = """
-            Choose an option:
-            1. Write a review
-            2. Search for a review(s)
-    
-            Option: """;
+        TUI tui = new TUI();
 
-            String menuOne = "Write a name for what would you like to review: ";
-            String menuTwo = """
-            Choose an option:
-            1. Search by Tag
-            2. Search by Name
-            3. Search by Description
-            4. List All
-            5. List by Tag
-    
-            Option: """;
+        String menu = """
+    Choose an option:
+    1. Write a review
+    2. Search/Edit a review(s)
 
-            String menuTwoFour = """
-            Choose an option:
-            1. ★ High -> Low
-            2. ★ Low -> High
-            3. Date newest first
-            4. Date oldest first
-            5. Tag groups
-            Option: """;
+    Option: """;
 
-            while (true) {
-                clearConsole();
-                System.out.print(menu);
+        String menuReview = "Write a name for what would you like to review: ";
+        String menuReviewScore = "Write a Score for the review (0 - 10 (including fractional values)): ";
+        String menuReviewTags = "Would you like to write any tags? (y/N) ";
 
-                String input = scan.nextLine().trim();
+        String menuSearch = """
+    Choose an option:
+    1. Search by Tag
+    2. Search by Name
+    3. Search by Description
+    4. List All
 
-                try {
-                    optionMain = Integer.parseInt(input);
-                    if (optionMain == 1 || optionMain == 2) {
-                        break;
-                    }
-                } catch (NumberFormatException e) {
-                }
-            }
-            if (optionMain == 1) {
-                while (true) {
-                    clearConsole();
-                    System.out.print(menuOne);
+    Option: """;
 
-                    String input = scan.nextLine().trim();
+        String menuEnterText = "Enter text: ";
+        String menuEnterTags = "Enter tags followed by hashtags with no spaces (e.g. #Books#Movies#Shows): ";
 
-                    try {
-                        item = input;
-                        break;
-                    } catch (NumberFormatException e) {
-                    }
-                }
-            } else {
-                item = null;
-                while (true) {
-                    clearConsole();
-                    System.out.print(menuTwo);
-                    String input = scan.nextLine().trim();
+        String menuSearchList = """
+    Choose an option:
+    1. ★ High -> Low
+    2. ★ Low -> High
+    3. Date newest first
+    4. Date oldest first
+    5. Tag groups
+    Option: """;
 
-                    try {
-                    optionMain = Integer.parseInt(input);
-                    if (optionMain > 0 && optionMain < 6) {
-                        break;
-                    }
-                    } catch (NumberFormatException e) {
-                    }
+        optionMain = tui.Integer(menu, 1, 2);
 
-                    //tbi
-                }
+        if (optionMain == 1) {
+            item = tui.Text(menuReview);
+            score = tui.Float(menuReviewScore, 0.0f, 10.0f);
+            ifTag = tui.Bool(menuReviewTags, false);
+            if (ifTag) {
+                tags = tui.Text(menuEnterTags);
             }
 
+        } else {
+            item = null;
+            optionMain = tui.Integer(menuSearch, 1, 4);
+
+            switch (optionMain) {
+                case 1 ->
+                    tagSearch = tui.Text(menuEnterText);
+                case 2 ->
+                    nameSearch = tui.Text(menuEnterText);
+                case 3 ->
+                    descSearch = tui.Text(menuEnterText);
+                default ->
+                    sort = tui.Integer(menuSearchList, 1, 5);
+            }
         }
     }
 
@@ -98,10 +92,9 @@ public class App {
         if (input == null) {
             return;
         }
-        String cleanedInput = input.replace("[", "").replace("]", "");
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            writer.write("[" + cleanedInput + "]" + System.lineSeparator());
+            writer.append(input + "," + score + "," + tags + ","+ LocalDate.now() + "\n");
             System.out.println("Data written");
 
         } catch (IOException e) {
