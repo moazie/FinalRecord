@@ -1,24 +1,28 @@
-
-
+import java.util.ArrayList;
 
 public class Review {
     private float starRating;
     private String description;
     private String name;
     private String date;
+    private String displayTag;
     private String tags;
 
-    Tags tagList = new Tags(tags);
+    private Tags tagList;
 
-    public Review(String name, String date, int starRating, String description, String tags) {
-        if (starRating < 1 || starRating > 10) {
+    public Review(String name, String date, float rating, String description, String tags) {
+        if (rating < 0 || rating > 10) {
             throw new IllegalArgumentException("Rating must be between 1 and 10.");
         }
-        this.starRating = starRating;
+        this.starRating = rating;
         this.description = description;
         this.name = name;
         this.date = date;
         this.tags = tags;
+
+        this.tagList = new Tags(tags);
+
+        this.displayTag = tagList.toString();
     }
 
     public float getStarRating() {
@@ -63,8 +67,17 @@ public class Review {
         return description;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<String> getTags() {
+        Tags tagObj = new Tags(tags);
+        return tagObj.tagArray;
+    }
+
     @Override
     public String toString() {
-        return (name + " | " + date + "\n" + displayStarRating(starRating) + "\n\n" + tagList.toString() + "\n\n" + description);
+        return ("\n" + name + " | " + date + "\n" + displayStarRating(starRating) + "\n" + displayTag + "\n" + description );
     }
 }

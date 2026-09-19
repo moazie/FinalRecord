@@ -18,6 +18,15 @@ public class TUI {
         }
     }
 
+    public String TextDesc(String text) {
+        while (true) {
+            Client.clearConsole();
+            System.out.print(text);
+            String input = scan.nextLine().trim();
+            return input;
+        }
+    }
+
     public Boolean Bool(String text, Boolean def) {
         while (true) {
             Client.clearConsole();
