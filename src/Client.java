@@ -2,7 +2,7 @@
 import java.io.*;
 import java.time.LocalDate;
 
-public class App {
+public class Client {
 
     static int optionMain;
     static String filePath = "data/data.csv";
@@ -22,8 +22,8 @@ public class App {
         //tbi
         clearConsole();
         userInterface();
-        fileWrite(item);
-
+        fileWrite();
+        fileRead();
     }
 
     public static void userInterface() {
@@ -88,19 +88,22 @@ public class App {
         }
     }
 
-    public static void fileWrite(String input) {
-        if (input == null) {
+    public static void fileWrite() {
+        if (item == null) {
             return;
         }
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            writer.append(input + "," + score + "," + tags + ","+ LocalDate.now() + "\n");
+            writer.append(item + "," + score + "," + tags + ","+ LocalDate.now() + "\n");
             System.out.println("Data written");
 
         } catch (IOException e) {
             System.err.println("Could not save data");
         }
 
+    }
+    public static void fileRead() {
+        
     }
 
     public static void clearConsole() {
@@ -114,4 +117,6 @@ public class App {
             System.out.println("Check the \'clear\' command.");
         }
     }
+
+
 }

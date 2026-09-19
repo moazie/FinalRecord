@@ -9,7 +9,7 @@ public class TUI {
 
     public String Text(String text) {
         while (true) {
-            App.clearConsole();
+            Client.clearConsole();
             System.out.print(text);
             String input = scan.nextLine().trim();
             if (!input.isEmpty()) {
@@ -20,7 +20,7 @@ public class TUI {
 
     public Boolean Bool(String text, Boolean def) {
         while (true) {
-            App.clearConsole();
+            Client.clearConsole();
             System.out.print(text);
             String input = scan.nextLine().trim();
             if (input.isEmpty()) {
@@ -35,7 +35,7 @@ public class TUI {
 
     public int Integer(String text, int lowerBound, int upperBound) {
         while (true) {
-            App.clearConsole();
+            Client.clearConsole();
             System.out.print(text);
             String input = scan.nextLine().trim();
             try {
@@ -50,7 +50,7 @@ public class TUI {
 
     public float Float(String text, float lowerBound, float upperBound) {
         while (true) {
-            App.clearConsole();
+            Client.clearConsole();
             System.out.print(text);
             String input = scan.nextLine().trim();
             try {
