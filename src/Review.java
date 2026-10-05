@@ -12,7 +12,7 @@ public class Review {
 
     public Review(String name, String date, float rating, String description, String tags) {
         if (rating < 0 || rating > 10) {
-            throw new IllegalArgumentException("Rating must be between 1 and 10.");
+            throw new IllegalArgumentException("Rating must be between 0 and 10.");
         }
         this.starRating = rating;
         this.description = description;
@@ -29,6 +29,10 @@ public class Review {
         return starRating;
     }
 
+    public String getStringDateCreated() {
+        return date;
+    }
+
     public static String displayStarRating(float stars) {
         char[] chars = new char[9];
         stars = stars / 2;
@@ -39,9 +43,9 @@ public class Review {
             int arrayIndex = i * 2;
 
             if (i < fullStars) {
-                chars[arrayIndex] = '★'; 
+                chars[arrayIndex] = '★';
             } else if (i == fullStars && fraction > 0) {
-  
+
                 if (fraction >= 0.75f) {
                     chars[arrayIndex] = '¾';
                 } else if (fraction >= 0.5f) {
@@ -52,7 +56,7 @@ public class Review {
                     chars[arrayIndex] = '☆';
                 }
             } else {
-                chars[arrayIndex] = '☆'; 
+                chars[arrayIndex] = '☆';
             }
 
             if (arrayIndex + 1 < chars.length) {
@@ -72,12 +76,13 @@ public class Review {
     }
 
     public ArrayList<String> getTags() {
-        Tags tagObj = new Tags(tags);
+        Tags tagObj = new Tags(tags); // fulfills scope requirement 1
         return tagObj.tagArray;
     }
 
     @Override
     public String toString() {
-        return ("\n" + name + " | " + date + "\n" + displayStarRating(starRating) + "\n" + displayTag + "\n" + description );
+        return ("\n" + name + " | " + date + "\n" + displayStarRating(starRating) + "\n" + displayTag + "\n"
+                + description);
     }
 }

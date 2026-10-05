@@ -18,7 +18,9 @@ public class Tags {
                         sb.setLength(0);
                     }
                 } else {
-                    sb.append(currentChar);
+                    if (i > tags.indexOf("#")) {
+                        sb.append(currentChar);
+                    }
                 }
             }
 
@@ -32,8 +34,22 @@ public class Tags {
     public String getTag(int idx) {
         if (tagArray.isEmpty()) {
             return "";
+        } else if (idx > tagArray.size() - 1 || idx < 0) {
+            return "";
         }
         return tagArray.get(idx);
+    }
+
+    public ArrayList<String> removeCommas(ArrayList<String> a) {
+        ArrayList<String> tagArray = new ArrayList<>();
+        for (String tag : a) {
+            if (tag != null) {
+                tagArray.add(tag.replace(",", ""));
+            } else {
+                tagArray.add("");
+            }
+        }
+        return tagArray;
     }
 
     @Override
@@ -45,7 +61,8 @@ public class Tags {
         sb.setLength(0);
         int count = 0;
 
-        for (String item : tagArray) {
+        for (String item : removeCommas(tagArray)) {
+
             if (count >= 1) {
                 sb.append(" ");
             }

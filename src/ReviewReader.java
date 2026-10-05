@@ -1,249 +1,169 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Scanner;
 
 public class ReviewReader {
-    ArrayList<Review> reviewList = new ArrayList<>();
-    ArrayList<String> tagList = new ArrayList<>();
-
-    private int count;
+    private final ArrayList<Review> reviewList;
+    private final ReviewRepository repository;
+    private final TUI tui = new TUI();
     private int tabs;
-    private String line;
-
-    private final Scanner scan = new Scanner(System.in);
 
     public ReviewReader() {
-
         if (Client.optionMain == 1) {
+            this.reviewList = new ArrayList<>();
+            this.repository = null;
             return;
         }
 
-        // Count how many reviews are in the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(Client.filePath))) {
+        // Initialize repository and load reviews
+        this.repository = new ReviewRepository(Client.filePath);
+        this.reviewList = repository.loadReviews();
 
-            while ((line = reader.readLine()) != null) {
-
-                if (!line.trim().isEmpty()) {
-                    count++;
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("Could not count reviews");
-            return;
-        }
-
-        // 5 reviews maximum per tab
-        tabs = (count + 4) / 5;
-
-        // No reviews
-        if (tabs == 0) {
+        if (reviewList.isEmpty()) {
             System.out.println("There are no reviews.");
             return;
         }
 
-        // Read reviews from the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(Client.filePath))) {
+        this.tabs = (reviewList.size() + 4) / 5;
 
-            while ((line = reader.readLine()) != null) {
+        // Check if deletion mode was chosen
+        if (Client.isDeleteMode) {
+            deleteReviewWorkflow();
+        } else {
+            showTabs();
+        }
+    }
 
-                if (line.trim().isEmpty()) {
-                    continue;
-                }
+    private void deleteReviewWorkflow() {
+        StringBuilder prompt = new StringBuilder("========== Delete a Review ==========\n\n");
+        
+        for (int i = 0; i < reviewList.size(); i++) {
+            prompt.append("[").append(i + 1).append("] ")
+                  .append(reviewList.get(i).getName())
+                  .append(" (").append(reviewList.get(i).getStarRating()).append(" ★ )\n");
+        }
+        
+        prompt.append("\nSelect the review number to delete (0 to cancel): ");
 
-                String[] sections = line.split(",", -1);
+        int choice = tui.readInteger(prompt.toString(), 0, reviewList.size(), false);
 
-                String name = sections[0];
-                float rating = Float.parseFloat(sections[1]);
-                String tags = sections[2];
-                String dateCreated = sections[3];
-                String desc = "";
-                if (sections.length > 4) {
-                    desc = sections[4];
-                }
-
-                Tags tagObj = new Tags(tags);
-
-                for (String tag : tagObj.tagArray) {
-                    tagList.add(tag);
-                }
-
-                Review currentReview = new Review(name, dateCreated, rating, desc, tags);
-
-                reviewList.add(currentReview);
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Could not read CSV");
+        if (choice == 0) {
+            System.out.println("Deletion cancelled.");
             return;
         }
 
-        showTabs();
+        Review removed = reviewList.remove(choice - 1);
+        repository.saveAllReviews(reviewList);
+        System.out.println("Successfully deleted review: " + removed.getName());
     }
 
     private void showTabs() {
-
-        // 1. DISPLAY TAB 1 BY DEFAULT BEFORE WAITING FOR USER INPUT
-        displayPage(1);
-
+        int currentPage = 1;
         while (true) {
+            displayPage(currentPage);
+            
+            String prompt = "\nWhich tab would you like to go to (0 to exit review) (1-" + tabs + " tabs): ";
+            int selected = tui.readInteger(prompt, 0, tabs, false);
 
-            System.out.println();
-            System.out.print(
-                    "Which tab would you like to go to "
-                            + "(0 to exit review) (1-" + tabs + " tabs): ");
-
-            String input = scan.nextLine().trim();
-
-            int selected;
-
-            try {
-                selected = Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                continue;
-            }
-
-            // 0 exits
             if (selected == 0) {
                 return;
             }
 
-            // Ignore invalid tab numbers
-            if (selected < 1 || selected > tabs) {
-                continue;
-            }
-
-            // 2. DISPLAY SELECTED TAB ON EACH USER INPUT
-            displayPage(selected);
+            currentPage = selected;
         }
-
     }
 
-    /**
-     * Renders a specific tab/page of reviews to the console.
-     */
     private void displayPage(int selected) {
         Client.clearConsole();
 
+        ArrayList<Review> filteredList = getFilteredReviews();
+
+        tabs = Math.max(1, (filteredList.size() + 4) / 5);
+        if (selected > tabs) {
+            selected = tabs;
+        }
+
         displayTabTop(selected);
 
+        sortReviews(filteredList);
+
+        if (filteredList.isEmpty()) {
+            System.out.println("\nNo reviews found matching your search.");
+        } else {
+            renderTabItems(filteredList, selected);
+        }
+
+        displayTabBottom(filteredList, selected);
+    }
+
+    private ArrayList<Review> getFilteredReviews() {
+        ArrayList<Review> filtered = new ArrayList<>();
+        for (Review review : reviewList) {
+            boolean matches = true;
+
+            if (Client.nameSearch != null && !review.getName().toLowerCase().contains(Client.nameSearch.toLowerCase())) {
+                matches = false;
+            }
+            if (Client.descSearch != null && !review.getDescription().toLowerCase().contains(Client.descSearch.toLowerCase())) {
+                matches = false;
+            }
+            if (Client.tagSearch != null) {
+                boolean tagMatch = false;
+                for (String tag : review.getTags()) {
+                    if (tag.toLowerCase().contains(Client.tagSearch.toLowerCase())) {
+                        tagMatch = true;
+                        break;
+                    }
+                }
+                if (!tagMatch) {
+                    matches = false;
+                }
+            }
+
+            if (matches) {
+                filtered.add(review);
+            }
+        }
+        return filtered;
+    }
+
+    private void sortReviews(ArrayList<Review> list) {
         switch (Client.sort) {
-            // high to low
-            case 1:
-                Collections.sort(reviewList, (r1, r2) -> {
-                    return Float.compare(r1.getStarRating(), r2.getStarRating());
-                });
-                Collections.reverse(reviewList);
-                oldToNew(selected);
+            case 1: // high to low
+                Collections.sort(list, (r1, r2) -> Float.compare(r2.getStarRating(), r1.getStarRating()));
                 break;
-            // low to high
-            case 2:
-                Collections.sort(reviewList, (r1, r2) -> {
-                    return Float.compare(r1.getStarRating(), r2.getStarRating());
-                });
-                oldToNew(selected);
+            case 2: // low to high
+                Collections.sort(list, (r1, r2) -> Float.compare(r1.getStarRating(), r2.getStarRating()));
                 break;
-
-            // new to old
-            case 3:
-                newToOld(selected);
+            case 3: // new to old
+                Collections.reverse(list);
                 break;
-
-            // old to new
-            case 4:
-                oldToNew(selected);
-                break;
-
-            // tag sort
-            case 5:
-                Collections.sort(reviewList, (r1, r2) -> {
-                    int matches = 0;
-                    for (String tag : r1.getTags()) {
-                        if (r2.getTags().contains(tag)) {
-                            matches++;
-                        }
-                    }
-                    if (matches > 0) {
-                        return -matches;
-                    }
-                    return r1.getTags().toString().compareTo(r2.getTags().toString());
-                });
-
-                oldToNew(selected);
-                break;
+            case 4: // old to new
             default:
                 break;
         }
+    }
 
-        if (Client.nameSearch != null) {
-            for (Review review : reviewList) {
-                if (review.getName().toLowerCase().contains(Client.nameSearch.toLowerCase())) {
-                    System.out.println(review.toString());
-                }
-            }
+    private void renderTabItems(ArrayList<Review> list, int tab) {
+        int start = (tab - 1) * 5;
+        int end = Math.min(start + 5, list.size());
+        for (int i = start; i < end; i++) {
+            System.out.println("\n" + list.get(i));
         }
-
-        if (Client.descSearch != null) {
-            for (Review review : reviewList) {
-                if (review.getDescription().toLowerCase().contains(Client.descSearch.toLowerCase())) {
-                    System.out.println(review.toString());
-                }
-            }
-        }
-
-        if (Client.tagSearch != null) {
-            for (Review review : reviewList) {
-                for (String tag : review.getTags()) {
-                    if (tag.toLowerCase().contains(Client.tagSearch.toLowerCase())) {
-                        System.out.println(review.toString());
-                    }
-                }
-            }
-        }
-
-        displayTabBottom(selected);
     }
 
     private void displayTabTop(int tab) {
-
-        System.out.println(
-                "========== Tab " + tab + " of " + tabs + " ==========");
-
+        System.out.println("========== Tab " + tab + " of " + tabs + " ==========");
     }
 
-    private void displayTabBottom(int tab) {
-        int start = (tab - 1) * 5;
-        int end = Math.min(start + 5, reviewList.size());
-        System.out.println();
-        System.out.println("================================");
-
-        System.out.println(
-                "Showing reviews " + (start + 1)
-                        + "-" + end
-                        + " of " + reviewList.size());
-    }
-
-    private void oldToNew(int tab) {
-        int start = (tab - 1) * 5;
-        int end = Math.min(start + 5, reviewList.size());
-        for (int i = start; i < end; i++) {
-            System.out.println();
-            System.out.println(reviewList.get(i));
+    private void displayTabBottom(ArrayList<Review> list, int tab) {
+        if (list.isEmpty()) {
+            System.out.println("\n================================");
+            System.out.println("Showing 0 reviews");
+            return;
         }
-    }
-
-    private void newToOld(int tab) {
         int start = (tab - 1) * 5;
-        int end = Math.min(start + 5, reviewList.size());
-
-        for (int i = end - 1; i >= start; i--) {
-            System.out.println();
-            System.out.println(reviewList.get(i));
-        }
+        int end = Math.min(start + 5, list.size());
+        System.out.println("\n================================");
+        System.out.println("Showing reviews " + (start + 1) + "-" + end + " of " + list.size());
     }
-
 }

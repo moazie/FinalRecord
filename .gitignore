@@ -2,3 +2,5 @@
 /bin
 /.vscode
 src/TagsTest.java
+src/ReviewTest.java
+src/FileIOTest.java

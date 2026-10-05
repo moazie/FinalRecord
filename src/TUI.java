@@ -2,51 +2,24 @@ import java.util.Scanner;
 
 public class TUI {
 
-    private final Scanner scan = new Scanner(System.in);
+    private final Scanner SCAN = new Scanner(System.in);
 
     public TUI() {
     }
 
-    public String Text(String text) {
+    // Default method (clears screen) for backward compatibility with Client
+    public int readInteger(String text, int lowerBound, int upperBound) {
+        return readInteger(text, lowerBound, upperBound, true);
+    }
+
+    // Overloaded method allowing caller to control screen clearing
+    public int readInteger(String text, int lowerBound, int upperBound, boolean clearScreen) {
         while (true) {
-            Client.clearConsole();
-            System.out.print(text);
-            String input = scan.nextLine().trim();
-            if (!input.isEmpty()) {
-                return input;
+            if (clearScreen) {
+                Client.clearConsole();
             }
-        }
-    }
-
-    public String TextDesc(String text) {
-        while (true) {
-            Client.clearConsole();
             System.out.print(text);
-            String input = scan.nextLine().trim();
-            return input;
-        }
-    }
-
-    public Boolean Bool(String text, Boolean def) {
-        while (true) {
-            Client.clearConsole();
-            System.out.print(text);
-            String input = scan.nextLine().trim();
-            if (input.isEmpty()) {
-                return def;
-            } else if (input.matches("y") || input.matches("Y")) {
-                return true;
-            } else if (input.matches("n") || input.matches("N")) {
-                return false;
-            }
-        }
-    }
-
-    public int Integer(String text, int lowerBound, int upperBound) {
-        while (true) {
-            Client.clearConsole();
-            System.out.print(text);
-            String input = scan.nextLine().trim();
+            String input = SCAN.nextLine().trim();
             try {
                 int value = Integer.parseInt(input);
                 if (value >= lowerBound && value <= upperBound) {
@@ -57,11 +30,50 @@ public class TUI {
         }
     }
 
-    public float Float(String text, float lowerBound, float upperBound) {
+    // Default text reader (clears screen)
+    public String readText(String text) {
+        return readText(text, true);
+    }
+
+    // Overloaded text reader
+    public String readText(String text, boolean clearScreen) {
+        while (true) {
+            if (clearScreen) {
+                Client.clearConsole();
+            }
+            System.out.print(text);
+            String input = SCAN.nextLine().trim();
+            if (!input.isEmpty()) {
+                return input;
+            }
+        }
+    }
+
+    public String readTextDesc(String text) {
+        System.out.print(text);
+        return SCAN.nextLine().trim();
+    }
+
+    public Boolean readBool(String text, Boolean def) {
         while (true) {
             Client.clearConsole();
             System.out.print(text);
-            String input = scan.nextLine().trim();
+            String input = SCAN.nextLine().trim();
+            if (input.isEmpty()) {
+                return def;
+            } else if (input.equalsIgnoreCase("y")) {
+                return true;
+            } else if (input.equalsIgnoreCase("n")) {
+                return false;
+            }
+        }
+    }
+
+    public float readFloat(String text, float lowerBound, float upperBound) {
+        while (true) {
+            Client.clearConsole();
+            System.out.print(text);
+            String input = SCAN.nextLine().trim();
             try {
                 float value = Float.parseFloat(input);
                 if (value >= lowerBound && value <= upperBound) {
