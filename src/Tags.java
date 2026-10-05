@@ -1,73 +1,53 @@
-
 import java.util.ArrayList;
 
 public class Tags {
 
-    ArrayList<String> tagArray = new ArrayList<>();
+    private final ArrayList<String> tagArray = new ArrayList<>();
 
+    // constructor by default formats the tags from the data raw file
+    // then inserts each tag in the above arraylist
     public Tags(String tags) {
-        StringBuilder sb = new StringBuilder();
         if (tags != null) {
-
-            for (int i = 0; i < tags.length(); i++) {
-                char currentChar = tags.charAt(i);
-
-                if (currentChar == '#') {
-                    if (sb.length() > 0) {
-                        tagArray.add(sb.toString().trim());
-                        sb.setLength(0);
-                    }
-                } else {
-                    if (i > tags.indexOf("#")) {
-                        sb.append(currentChar);
+            //check for # in first tag
+            int firstHashIndex = tags.indexOf("#");
+            if (firstHashIndex != -1) {
+                String validTagsString = tags.substring(firstHashIndex);
+                String[] parts = validTagsString.split("#");
+                for (String part : parts) {
+                    String cleaned = part.replace(" ", "").trim();
+                    if (!cleaned.isEmpty()) {
+                        tagArray.add(cleaned);
                     }
                 }
             }
-
-            if (sb.length() > 0) {
-                tagArray.add(sb.toString().trim());
-            }
         }
-
     }
 
+    //returns the tags in an arraylist of String
+    public ArrayList<String> getTagArray() {
+        return tagArray;
+    }
+
+    // Get a tag at index
     public String getTag(int idx) {
-        if (tagArray.isEmpty()) {
-            return "";
-        } else if (idx > tagArray.size() - 1 || idx < 0) {
+        if (idx < 0 || idx >= tagArray.size()) {
             return "";
         }
         return tagArray.get(idx);
     }
 
-    public ArrayList<String> removeCommas(ArrayList<String> a) {
-        ArrayList<String> tagArray = new ArrayList<>();
-        for (String tag : a) {
-            if (tag != null) {
-                tagArray.add(tag.replace(",", ""));
-            } else {
-                tagArray.add("");
-            }
-        }
-        return tagArray;
-    }
-
+    //prints tags in this format [Tag 1] [Tag 2]
     @Override
     public String toString() {
-        if (tagArray == null) {
+        if (tagArray.isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        sb.setLength(0);
-        int count = 0;
-
-        for (String item : removeCommas(tagArray)) {
-
-            if (count >= 1) {
+        for (int i = 0; i < tagArray.size(); i++) {
+            if (i > 0) {
                 sb.append(" ");
             }
-            sb.append("[" + item + "]");
-            count++;
+            sb.append("[").append(tagArray.get(i)).append("]");
         }
         return sb.toString();
     }

@@ -31,7 +31,7 @@ public class ReviewRepository {
                 String dateCreated = sections[3];
                 String desc = sections.length > 4 ? sections[4] : "";
 
-                Review currentReview = new Review(name, dateCreated, rating, desc, tags);
+                Review currentReview = new Review(name, dateCreated, rating, desc, tags); 
                 reviewList.add(currentReview);
             }
         } catch (Exception e) {

@@ -10,6 +10,7 @@ public class Review {
 
     private Tags tagList;
 
+    //default constructor takes all inputs required for a review
     public Review(String name, String date, float rating, String description, String tags) {
         if (rating < 0 || rating > 10) {
             throw new IllegalArgumentException("Rating must be between 0 and 10.");
@@ -77,7 +78,7 @@ public class Review {
 
     public ArrayList<String> getTags() {
         Tags tagObj = new Tags(tags); // fulfills scope requirement 1
-        return tagObj.tagArray;
+        return tagObj.getTagArray();
     }
 
     @Override

@@ -8,6 +8,7 @@ public class Client {
     static String item = null;
     static String tags = "";
     static String desc = "";
+    static LocalDate date = null;
 
     static String nameSearch = null;
     static String tagSearch = null;
@@ -17,8 +18,8 @@ public class Client {
     static boolean ifTag = false;
 
     public static int sort = 0;
-    static boolean cancelSearch = false; // Flag to track back action
-    static boolean isDeleteMode = false; // Flag to indicate deletion flow
+    static boolean cancelSearch = false; // flag to track back action
+    static boolean isDeleteMode = false; // flag to indicate deletion flow
 
     public static void main(String[] args) throws Exception {
         boolean running = true;
@@ -64,12 +65,12 @@ public class Client {
         TUI tui = new TUI();
 
         String menu = """
-                                                  
-                 _____ _         _    _____ _____               _ 
+
+                 _____ _         _    _____ _____               _
                 |   __|_|___ ___| |  | __  |   __|___ ___ ___ _| |
                 |   __| |   | .'| |  |    -|   __|  _| . |  _| . |
                 |__|  |_|_|_|__,|_|  |__|__|_____|___|___|_| |___|
-                                                  
+
 
                 Welcome to the Final Record!
                 Choose an option:
@@ -82,6 +83,8 @@ public class Client {
         String menuReview = "Write a name for what would you like to review (Ctrl C to exit): ";
         String menuReviewScore = "Write a Score for the review (0 - 10 (including fractional values)): ";
         String menuReviewTags = "Would you like to write any tags? (y/N) ";
+        String menuCustomDate = "Would you like to customize the review date? (y/N) ";
+        String menuEnterDate = "Enter date in YYYY-MM-DD format (or leave blank for today)";
 
         String menuSearch = """
                 Choose an option:
@@ -109,10 +112,17 @@ public class Client {
 
         // Main Menu selection
         optionMain = tui.readInteger(menu, 1, 3);
-
         if (optionMain == 1) {
             item = tui.readText(menuReview);
             score = tui.readFloat(menuReviewScore, 0.0f, 10.0f);
+
+            boolean customDate = tui.readBool(menuCustomDate, false);
+            if (customDate) {
+                date = tui.readDate(menuEnterDate);
+            } else {
+                date = LocalDate.now();
+            }
+
             ifTag = tui.readBool(menuReviewTags, false);
             if (ifTag) {
                 tags = tui.readText(menuEnterTags);
@@ -169,7 +179,7 @@ public class Client {
         validateInput(desc);
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            writer.append(item + "," + score + "," + tags + "," + LocalDate.now() + "," + desc + "\n");
+            writer.append(item + "," + score + "," + tags + "," + date + "," + desc + "\n");
             System.out.println("Data successfully written!");
         } catch (IOException e) {
             System.err.println("Could not save data: " + e.getMessage());
