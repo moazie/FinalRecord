@@ -24,8 +24,8 @@ Have you wished that there was just one place to store all my thoughts about man
 
 ## Instructions to run
 
-* Ensure Java Development Kit (JDK) 8 or higher is installed on your system and is available in the PATH variables of your system.
-  run `javac -version` in your command prompt or terminal to verify if you have it on your system. If not you can install it at: https://adoptium.net/temurin/releases/?version=8
+* Ensure Java Development Kit (JDK) 17 or higher is installed on your system and is available in the PATH variables of your system.
+  run `javac -version` in your command prompt or terminal to verify if you have it on your system. If not you can install it at: https://adoptium.net/temurin/releases/?version=17
 * Navigate to the root directory containing the source code files.
 * Ensure a directory named `data` exists in the root directory (or create a folder with the same name).
 * This application combines the javac/java compile and run command process:
