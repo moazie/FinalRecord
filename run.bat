@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 echo Compiling...
 javac -cp "lib/*;src" src/Client.java
 
