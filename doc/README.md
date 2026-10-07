@@ -2,6 +2,8 @@
 
 by Moaz
 
+![alt text](screenshot.png)
+
 ## What does this do?
 Have you ever been tired of tracking all your media consumption in many seperate apps?
 
